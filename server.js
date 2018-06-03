@@ -1,9 +1,51 @@
-var socket_server= require('ws').Server;
-var s= new socket_server({port:8080});
+var socket_server= require('ws');
+
+
+var http = require('http');
+var path = require('path');
+var fs = require('fs');
 var presenceCounter=0;
-var clientNames=[];
+var clientNames=[];//not using yet
 
 
+
+//http server for serving static files
+var server= new http.createServer(function(request,response){
+    var filePath = '.' + request.url;
+    if (filePath == './')
+        filePath = './index.html';
+
+    var extname = path.extname(filePath);
+    var contentType = 'text/html';
+    fs.readFile(filePath, function(error, content) {
+        if (error) {
+            if(error.code == 'ENOENT'){
+                fs.readFile('./404.html', function(error, content) {
+                    response.writeHead(200, { 'Content-Type': contentType });
+                    response.end(content, 'utf-8');
+                });
+            }
+            else {
+                response.writeHead(500);
+                response.end('Sorry, check with the site admin for error: '+error.code+' ..\n');
+                response.end(); 
+            }
+        }
+        else {
+            response.writeHead(200, { 'Content-Type': contentType });
+            response.end(content, 'utf-8');
+        }
+    });
+
+});
+// my static http server code ends here
+
+
+
+
+
+// socket server code below
+var s= new socket_server.Server({server});
 s.on('connection',function(ws){
     presenceCounter++;
     s.clients.forEach(function(client){  
@@ -80,3 +122,6 @@ s.on('connection',function(ws){
     // console.log('client connected');   
     
 });
+
+//listening http server
+server.listen(8080);
