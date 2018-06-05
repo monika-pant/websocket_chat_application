@@ -65,13 +65,19 @@ function updateUI(domElement, list, userName) {
     list.forEach(function (e) {
         var Myuser = e.user;
         var presenceClass = 'red'
+        var checkClass= 'activate'
+
+
+
         console.log(e.status)
         if (e.status == 'online')
             presenceClass = 'green'
+        if(e.status== 'offline')
+            checkClass='deactivate'
         // if(e.user==userName)
         // Myuser='You';
 
-        userList.innerHTML += '<li> <input type="checkbox">' + e.user + '&nbsp;<label class=' + presenceClass + '>' + e.status + '</label></li>'
+        userList.innerHTML += '<li class='+checkClass +'> <input type="checkbox" >' + e.user + '&nbsp;<label class=' + presenceClass + '>' + e.status + '</label></li>'
     });
 
 }
