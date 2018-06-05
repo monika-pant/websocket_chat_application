@@ -14,8 +14,10 @@ var server= new http.createServer(function(request,response){
     var filePath = '.' + request.url;
     if (filePath == './')
         filePath = './index.html';
-
-    var extname = path.extname(filePath);
+    
+    var extname = path.extname(filePath);//check file extension
+    // console.log(filepath);
+    // console.log(extname);
     var contentType = 'text/html';
     fs.readFile(filePath, function(error, content) {
         if (error) {
