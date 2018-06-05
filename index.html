@@ -1,94 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Websocket connection</title>
     <style>
-    .msg-container{
-    border: 4px solid #666666;
-    padding: 5px;
-    width:40%;
-    margin:5px;
-    height:500px;
-    overflow:auto;
-}
-.msg-label{
-    font-weight: bold;
-    color:#666666;
-}
-.green{
-    color:green;
-}
-.red{
-    color:red;
-}
-.left{
-    float: left;
-}
-ul,li{
-    list-style-type: none;
-}
-.userlist{
-    height:200px;
-    overflow: auto;
-}
-.callBtn{
-    background:#333333;
-    color:#ffffff;
-    padding:10px;
-    appearance: none;
-    -webkit-appearance: none;
-    border-radius:4px;
-    display:none;
-}
-.callBtn:hover{
-    cursor: pointer;
-    background: #000000;
-}
-.deactivate{
-pointer-events: none;
-background:grey;
-color:#ffffff;
-}
-ul,li{
-    margin: 0;
-    padding:0;
-}
-.userlist li{
-    /* background: #dedede; */
-    /* color:#333333; */
-    padding: 10px;
-    margin:2px;
-}
-.userlist li:hover{
-    background: #acabab;
-    cursor: pointer
-}
-</style>
+        .msg-container {
+            border: 4px solid #666666;
+            padding: 5px;
+            width: 40%;
+            margin: 5px;
+            height: 500px;
+            overflow: auto;
+        }
+
+        .msg-label {
+            font-weight: bold;
+            color: #666666;
+        }
+
+        .green {
+            color: green;
+        }
+
+        .red {
+            color: red;
+        }
+
+        .left {
+            float: left;
+        }
+
+        ul,
+        li {
+            list-style-type: none;
+        }
+
+        .userlist {
+            height: 200px;
+            overflow: auto;
+        }
+
+        .callBtn {
+            background: #333333;
+            color: #ffffff;
+            padding: 10px;
+            appearance: none;
+            -webkit-appearance: none;
+            border-radius: 4px;
+            /* display: none; */
+        }
+
+        .callBtn:hover {
+            cursor: pointer;
+            background: #000000;
+        }
+
+        .deactivate {
+            pointer-events: none;
+            background: grey;
+            color: #ffffff;
+        }
+
+        ul,
+        li {
+            margin: 0;
+            padding: 0;
+        }
+
+        .userlist li.activate {
+            /* background: #dedede; */
+            /* color:#333333; */
+            padding: 10px;
+            margin: 2px;
+        }
+
+        .userlist li.activate:hover {
+            background: #acabab;
+            cursor: pointer
+        }
+    </style>
 </head>
+
 <body>
     <div>
-            <h3 id="welcomeMsg"></h3>
-            <label class="_clientConnected" id="userCounter"></label>
+        <h3 id="welcomeMsg"></h3>
+        <label class="_clientConnected" id="userCounter"></label>
     </div>
 
     <div class="left">
-        <ul id="userlist" class="userlist"> 
+        <ul id="userlist" class="userlist">
 
         </ul>
-        <button id="makeCall" class="callBtn">make a call</button>
+        <button id="makeCall" class="callBtn" style="display:none;">make a call</button>
     </div>
     <div class="msg-container left">
         <div id="_message"></div>
     </div>
     <div class='left'>
-        <textarea name="" id="_text" cols="30" rows="5" placeholder="your message here"></textarea>
-        <button>Send</button>
+        <div>
+            <textarea name="" id="_text" cols="30" rows="5" placeholder="your message here"></textarea>
+        </div>
+        <div>
+            <button id="sendMsg" class="callBtn">Send Message</button>
+        </div>
+        <h4>My video goes here</h4>
+        
+        <div class="left">
+            <h5>Client 1</h5>
+            <video id="clientvideo"></video>
+        </div>
+        <div class="left">
+            <h5>Client 2</h5>
+            <video d="servervdeo"></video>
+        </div>
     </div>
-    
+
 </body>
 <script src="client.js"></script>
 <!-- <script src="renderer.js"></script> -->
+
 </html>

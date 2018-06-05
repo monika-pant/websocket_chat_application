@@ -87,6 +87,25 @@ s.on('connection', function (ws) {
 
                 });
                 break;
+            case 'call':
+            // console.log('call msg====================',msg);
+            // console.log('call person name============',ws.personName);
+            s.clients.forEach(function e(client) {
+                 console.log('client is here',client.personName);
+                 console.log(msg)
+                if (client.personName == msg.receiver) {
+                    console.log('inside if')
+                    let data=JSON.stringify({
+                        sender: ws.personName,
+                        data: 'handshaking with user',
+                        type: 'call'
+                    });
+                    client.send(data);
+                    
+                }
+
+            });
+                break;
             default:
                 break;
         }
