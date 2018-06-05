@@ -4,7 +4,7 @@ var socket = new WebSocket('ws://localhost:8080');
 var userList = document.getElementById('userlist');
 var msgDiv = document.getElementById('_message');
 var editorNode = document.getElementById('_text');
-var callBtn=document.getElementById('makeCall');
+var callBtn = document.getElementById('makeCall');
 //client details array for connected users
 var clientData = [];
 
@@ -28,7 +28,7 @@ socket.onmessage = function (message) {
 
         // testing update ui method
         clientData = jsonData.clientlist;
-        updateUI(userList, clientData,jsonData.currentUser)
+        updateUI(userList, clientData, jsonData.currentUser)
     }
     else if (jsonData.type == 'open') {
 
@@ -57,28 +57,21 @@ sendBtn.onclick = function () {
 
 
 
-function updateUI(domElement, list,userName) {
+function updateUI(domElement, list, userName) {
     userList.innerHTML = ' ';
-    var presenceClass = 'red'
-    console.log(list)
-    callBtn.style.display='block';
+    
+    console.log('=======',list)
+    callBtn.style.display = 'block';
     list.forEach(function (e) {
-        // var innerNode = document.createElement('li');
-        // var statusLabel = document.createElement('label')
-        // var txtNode = document.createTextNode(e.user);
-        // innerNode.appendChild(txtNode);
-        // innerNode.appendChild(statusLabel.appendChild(document.createTextNode('    ' + e.status)))
-        // userList.appendChild(innerNode);
-
-
-        //better way using innerHML
-        var Myuser=e.user;
+        var Myuser = e.user;
+        var presenceClass = 'red'
+        console.log(e.status)
         if (e.status == 'online')
             presenceClass = 'green'
-        if(e.user==userName)
-            Myuser='You';
-           
-        userList.innerHTML += '<li> <input type="checkbox">' + Myuser + '&nbsp;<label class=' + presenceClass + '>' + e.status + '</label></li>'
+        // if(e.user==userName)
+        // Myuser='You';
+
+        userList.innerHTML += '<li> <input type="checkbox">' + e.user + '&nbsp;<label class=' + presenceClass + '>' + e.status + '</label></li>'
     });
 
 }

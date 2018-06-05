@@ -100,7 +100,7 @@ s.on('connection', function (ws) {
             client.send(JSON.stringify({
                 clientlist: clientDataList,
                 name: ws.personName,
-                presence: "offline",
+                status: "offline",
                 type: 'close'
             }));
             return;
