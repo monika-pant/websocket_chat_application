@@ -160,7 +160,7 @@ function updateUI(domElement, list, userName) {
 function printMsg(message, msgDiv, editorNode) {
     switch (message.type) {
         case 'close':
-            msgDiv.innerHTML += '<div><span class="msg-label red"> ' + message.name + '&nbsp; got disconnected</span></div>';
+            msgDiv.innerHTML += '<div style="font-style:italic;"><span class="msg-label red"> ' + message.name + '&nbsp; got disconnected</span></div>';
             editorNode.innerHTML = ' ';
             break;
 
