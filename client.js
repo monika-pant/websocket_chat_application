@@ -39,8 +39,10 @@ socket.onmessage = function (message) {
     else if (jsonData.type == 'call') {       
         // console.log('call message',jsonData)
         //below alert will be a push noifiation for receiver.
-        streamVideofuntion()
-        alert('new message from '+jsonData.sender);
+        
+        if(confirm('new message from '+jsonData.sender)){
+            streamVideofuntion()
+        };
     }
     else if (jsonData.type == 'close') {
         // console.log('close data=================',jsonData)
@@ -75,6 +77,7 @@ callBtn.onclick = function () {
         sender: name
     })
     socket.send(data)
+    streamVideofuntion()
 }
 
 
