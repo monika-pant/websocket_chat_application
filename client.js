@@ -5,9 +5,16 @@ var userList = document.getElementById('userlist');
 var msgDiv = document.getElementById('_message');
 var editorNode = document.getElementById('_text');
 var callBtn = document.getElementById('makeCall');
+//video elements
+var vid1 = document.getElementById('clientvideo');
+var vid2 = document.getElementById('servervdeo');
 //client details array for connected users
 var clientData = [];
-
+var pc1,
+    pc2,
+    sdp,
+    localStream;
+var callFlag = false;
 
 /**
  * socket connection code
@@ -36,12 +43,17 @@ socket.onmessage = function (message) {
         clientData = jsonData.clientlist;
         updateUI(userList, clientData, name)
     }
-    else if (jsonData.type == 'call') {       
+    else if (jsonData.type == 'call') {
         // console.log('call message',jsonData)
         //below alert will be a push noifiation for receiver.
-        
-        if(confirm('new message from '+jsonData.sender)){
-            streamVideofuntion()
+        // send any ice candidates to the other peer
+        if (jsonData.sdp)
+        pc1.setRemoteDescription(new RTCSessionDescription(jsonData.sdp));
+    else
+        pc1.addIceCandidate(new RTCIceCandidate(jsonData.candidate));
+
+        if (confirm('new message from ' + jsonData.sender)) {
+            streamVideofuntion(jsonData.sender)
         };
     }
     else if (jsonData.type == 'close') {
@@ -50,7 +62,7 @@ socket.onmessage = function (message) {
         updateUI(userList, clientData, name)
         printMsg(jsonData, msgDiv, editorNode);
     }
-
+    console.log('checking for SDP=======', jsonData.type)
 }
 var sendBtn = document.querySelector('#sendMsg');
 sendBtn.onclick = function () {
@@ -63,21 +75,28 @@ sendBtn.onclick = function () {
     editorNode.innerHTML = ' ';
 }
 var callBtn = document.querySelector('#makeCall');
+
+/**
+ * calling feature
+ */
 callBtn.onclick = function () {
     var userOncall = '';
+    callFlag = true;
     var checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
     //right now we r considering only 1-O-1 chat
     checkboxes.forEach(function (e) {
-        userOncall=(e.nextSibling.data);
-    });
-
+        userOncall = (e.nextSibling.data);
+    }); 
+      
+    var sdpVal=streamVideofuntion(callFlag);
+    console.log(sdpVal)
     let data = JSON.stringify({
-        receiver:userOncall,
+        receiver: userOncall,
         type: 'call',
-        sender: name
+        sender: name,
+        sdp:sdpVal
     })
     socket.send(data)
-    streamVideofuntion()
 }
 
 
@@ -86,53 +105,86 @@ callBtn.onclick = function () {
 /**All FUNCTONS are written over here
  * web RTC video calling code
  */
-function streamVideofuntion(){
-    var constraints = {audio: true, video: { width: 100, height: 140 } };
+
+function streamVideofuntion(flag) {
+    pc1 = new RTCPeerConnection();
+        pc2 = new RTCPeerConnection();
+    pc1.onicecandidate = function (evt) {
+        socket.send(JSON.stringify({ "candidate": evt.candidate }));
+    };
+    pc1.onaddstream = function (evt) {
+        remoteView.srcObject = evt.stream;
+    };
+
+        
+
+
+    var constraints = { audio: true, video: { width: 100, height: 140 } };
     if (navigator.mediaDevices === undefined) {
         navigator.mediaDevices = {};
-      }
-    
-    
-      if (navigator.mediaDevices.getUserMedia === undefined) {
-        navigator.mediaDevices.getUserMedia = function(constraints) {
-      
-          // First get ahold of the legacy getUserMedia, if present
-          var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-      
-          // Some browsers just don't implement it - return a rejected promise with an error
-          // to keep a consistent interface
-          if (!getUserMedia) {
-            return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
-          }
-      
-          // Otherwise, wrap the call to the old navigator.getUserMedia with a Promise
-          return new Promise(function(resolve, reject) {
-            getUserMedia.call(navigator, constraints, resolve, reject);
-          });
+    }
+
+
+    if (navigator.mediaDevices.getUserMedia === undefined) {
+        navigator.mediaDevices.getUserMedia = function (constraints) {
+
+            // First get ahold of the legacy getUserMedia, if present
+            var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+            // Some browsers just don't implement it - return a rejected promise with an error
+            // to keep a consistent interface
+            if (!getUserMedia) {
+                return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
+            }
+
+            // Otherwise, wrap the call to the old navigator.getUserMedia with a Promise
+            return new Promise(function (resolve, reject) {
+                getUserMedia.call(navigator, constraints, resolve, reject);
+            });
         }
-      }
-      navigator.mediaDevices.getUserMedia(constraints).then(function(localMediaStream){
+    }
+    navigator.mediaDevices.getUserMedia(constraints).then(function (localMediaStream) {
         var video = document.querySelector('#clientvideo');
+        localStream=localMediaStream;
+
+        /*************************************
+            RTCPeerConnection
+         ************************************/
+        
+        
+       pc1.addStream(localStream);
+        console.log('peer p1===========', pc1)
         // Older browsers may not have srcObject
-      if ("srcObject" in video) {
-        video.srcObject = localMediaStream;
-      } else {
-        // Avoid using this in new browsers, as it is going away.
-        video.src = window.URL.createObjectURL(localMediaStream);
-      }
-        video.onloadedmetadata = function(e) {
-          video.play();
-        };
-    })
-    .catch(function(err){
-        console.log(err.name + ": " + err.message);
-    });
-    
-    /*************************************
-    RTCPeerConnection
-     ************************************/
-    // var pc = RTCPeerConnection(config);
-    
+        if ("srcObject" in video) {
+            video.srcObject = localMediaStream;
+        } else {
+            // Avoid using this in new browsers, as it is going away.
+            video.src = window.URL.createObjectURL(localMediaStream);
+        }
+        //checking if the message type is to make a call
+        if (callFlag) {
+        pc1.createOffer(gotDescription1)
+        console.log('offer created')
+        }
+        else
+        pc1.createAnswer(pc1.remoteDescription, gotDescription1);
+        //callback function to set SDP
+        function gotDescription1(desc) {
+            console.log('SDP generated by browser=====', desc   )
+            pc1.setLocalDescription(desc).then(function(){
+                console.log('set description done')
+            });
+            trace("Offer from pc1 \n" + desc.sdp);
+            pc2.setRemoteDescription(desc);
+            pc2.createAnswer(gotDescription2);
+            sdp = JSON.stringify({ 'sdp': desc, 'type': 'sdp-request' });            
+        }
+        })
+        .catch(function (err) {
+            console.log(err.name + ": " + err.message);
+        });
+
+        return(sdp);
 }
 
 function updateUI(domElement, list, userName) {
